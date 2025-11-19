@@ -1,0 +1,517 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>按键配置管理</title>
+    <style>
+        :root {
+            color-scheme: light;
+            font-family: 'Microsoft YaHei', 'PingFang SC', 'Helvetica Neue', Arial, sans-serif;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            background: #f5f6fb;
+            color: #2f3137;
+        }
+
+        body::before {
+            content: '';
+            display: block;
+            height: 6px;
+            background: linear-gradient(90deg, #6d9dfc, #7cd5ff, #74e2d3, #f8ce74, #ff9f7f, #ff6f91);
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 40px auto 60px;
+            padding: 0 20px;
+        }
+
+        .header {
+            background: #fbfbfe;
+            border: 1px solid #e7e9f2;
+            border-radius: 10px;
+            padding: 24px;
+            margin-bottom: 24px;
+            box-shadow: 0 8px 28px rgba(110, 124, 158, 0.12);
+        }
+
+        .header h1 {
+            margin: 0 0 12px 0;
+            color: #212226;
+            font-size: 24px;
+            font-weight: 600;
+        }
+
+        .header p {
+            margin: 0;
+            color: #7c8399;
+            font-size: 14px;
+        }
+
+        .actions {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 24px;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border: 1px solid #cdd5ea;
+            border-radius: 6px;
+            background: #fff;
+            color: #394150;
+            cursor: pointer;
+            font: inherit;
+            transition: all 0.2s ease;
+        }
+
+        .btn:hover {
+            border-color: #9bb2f5;
+            color: #274cb7;
+        }
+
+        .btn-primary {
+            background: #4b6cff;
+            border-color: #4b6cff;
+            color: #fff;
+        }
+
+        .btn-primary:hover {
+            background: #3756d6;
+            border-color: #3756d6;
+        }
+
+        .btn-success {
+            background: #28a745;
+            border-color: #28a745;
+            color: #fff;
+        }
+
+        .btn-success:hover {
+            background: #218838;
+            border-color: #218838;
+        }
+
+        .config-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 16px;
+        }
+
+        .key-card {
+            background: #fbfbfe;
+            border: 1px solid #e7e9f2;
+            border-radius: 8px;
+            padding: 16px;
+            box-shadow: 0 2px 8px rgba(110, 124, 158, 0.08);
+        }
+
+        .key-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 12px;
+        }
+
+        .key-badge {
+            width: 32px;
+            height: 32px;
+            background: #edf2ff;
+            border: 1px solid #d7e2ff;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            color: #4b6cff;
+            font-size: 14px;
+        }
+
+        .key-title {
+            font-weight: 600;
+            color: #212226;
+            font-size: 16px;
+        }
+
+        .input-group {
+            margin-bottom: 12px;
+        }
+
+        .input-group label {
+            display: block;
+            margin-bottom: 4px;
+            font-size: 12px;
+            color: #7c8399;
+            font-weight: 500;
+        }
+
+        .input-group input {
+            width: 100%;
+            padding: 8px 12px;
+            border: 1px solid #d8def0;
+            border-radius: 4px;
+            font: inherit;
+            font-size: 14px;
+        }
+
+        .input-group input:focus {
+            outline: none;
+            border-color: #7fa8ff;
+            box-shadow: 0 0 0 2px rgba(127, 168, 255, 0.32);
+        }
+
+        .preview {
+            background: #f9faff;
+            border: 1px solid #e1e5f4;
+            border-radius: 4px;
+            padding: 8px 12px;
+            font-size: 12px;
+            color: #485065;
+            min-height: 20px;
+        }
+
+        .search-box {
+            width: 300px;
+            padding: 10px 16px;
+            border: 1px solid #d8def0;
+            border-radius: 6px;
+            font: inherit;
+            font-size: 14px;
+        }
+
+        .search-box:focus {
+            outline: none;
+            border-color: #7fa8ff;
+            box-shadow: 0 0 0 2px rgba(127, 168, 255, 0.32);
+        }
+
+        .status {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 12px 20px;
+            background: #28a745;
+            color: white;
+            border-radius: 6px;
+            font-size: 14px;
+            transform: translateX(100%);
+            transition: transform 0.3s ease;
+            z-index: 1000;
+        }
+
+        .status.show {
+            transform: translateX(0);
+        }
+
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            color: #4b6cff;
+            text-decoration: none;
+            font-size: 14px;
+            margin-bottom: 20px;
+        }
+
+        .back-link:hover {
+            color: #3756d6;
+        }
+
+        @media (max-width: 768px) {
+            .config-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .actions {
+                flex-direction: column;
+            }
+            
+            .search-box {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <a href="index.html" class="back-link">
+            ← 返回随机数生成器
+        </a>
+
+        <div class="header">
+            <h1>按键配置管理</h1>
+            <p>为每个按键设置预设的数字序列，长按对应按键时将显示这些数字</p>
+        </div>
+
+        <div class="actions">
+            <input type="text" class="search-box" id="searchBox" placeholder="搜索按键...">
+            <button class="btn btn-primary" id="saveBtn">保存所有配置</button>
+            <button class="btn" id="resetBtn">重置为默认</button>
+            <button class="btn" id="revokeBtn" style="background: #dc3545; border-color: #dc3545; color: #fff;">取消授权</button>
+        </div>
+
+        <div class="config-grid" id="configGrid">
+            <!-- 动态生成的按键配置卡片 -->
+        </div>
+    </div>
+
+    <div class="status" id="status">配置已保存</div>
+
+    <script>
+        // 默认配置
+        const defaultConfig = {
+            'a': [1, 2, 3],
+            'b': [4, 5, 6],
+            'c': [7, 8, 9],
+            'd': [10, 11, 12],
+            'e': [13, 14, 15],
+            'f': [16, 17, 18],
+            'g': [19, 20, 21],
+            'h': [22, 23, 24],
+            'i': [25, 26, 27],
+            'j': [28, 29, 30],
+            'k': [31, 32, 33],
+            'l': [34, 35, 36],
+            'm': [37, 38, 39],
+            'n': [40, 41, 42],
+            'o': [43, 44, 45],
+            'p': [46, 47, 48],
+            'q': [49, 50, 51],
+            'r': [52, 53, 54],
+            's': [55, 56, 57],
+            't': [58, 59, 60],
+            'u': [61, 62, 63],
+            'v': [64, 65, 66],
+            'w': [67, 68, 69],
+            'x': [70, 71, 72],
+            'y': [73, 74, 75],
+            'z': [76, 77, 78],
+            '0': [0],
+            '1': [1],
+            '2': [2],
+            '3': [3],
+            '4': [4],
+            '5': [5],
+            '6': [6],
+            '7': [7],
+            '8': [8],
+            '9': [9]
+        };
+
+        let currentConfig = {};
+
+        // DOM 元素
+        const configGrid = document.getElementById('configGrid');
+        const searchBox = document.getElementById('searchBox');
+        const saveBtn = document.getElementById('saveBtn');
+        const resetBtn = document.getElementById('resetBtn');
+        const revokeBtn = document.getElementById('revokeBtn');
+        const status = document.getElementById('status');
+
+        // 初始化
+        function init() {
+            loadConfig();
+            renderConfigCards();
+            bindEvents();
+        }
+
+        // 加载配置
+        function loadConfig() {
+            const saved = localStorage.getItem('keyConfig');
+            if (saved) {
+                try {
+                    currentConfig = JSON.parse(saved);
+                } catch (e) {
+                    currentConfig = { ...defaultConfig };
+                }
+            } else {
+                currentConfig = { ...defaultConfig };
+            }
+        }
+
+        // 保存配置
+        function saveConfig() {
+            localStorage.setItem('keyConfig', JSON.stringify(currentConfig));
+            showStatus('配置已保存');
+        }
+
+        // 渲染配置卡片
+        function renderConfigCards(filter = '') {
+            configGrid.innerHTML = '';
+            
+            const keys = Object.keys(currentConfig).filter(key => 
+                key.toLowerCase().includes(filter.toLowerCase())
+            );
+
+            keys.forEach(key => {
+                const card = createConfigCard(key, currentConfig[key]);
+                configGrid.appendChild(card);
+            });
+        }
+
+        // 创建配置卡片
+        function createConfigCard(key, values) {
+            const card = document.createElement('div');
+            card.className = 'key-card';
+            
+            const isLetter = /[a-zA-Z]/.test(key);
+            const isNumber = /[0-9]/.test(key);
+            
+            card.innerHTML = `
+                <div class="key-header">
+                    <div class="key-badge">${key.toUpperCase()}</div>
+                    <div class="key-title">按键 ${key.toUpperCase()}</div>
+                </div>
+                <div class="input-group">
+                    <label>预设数字 (用逗号分隔)</label>
+                    <input type="text" value="${values.join(', ')}" data-key="${key}">
+                </div>
+                <div class="input-group">
+                    <label>预览</label>
+                    <div class="preview">${values.length > 0 ? values.join(' ') : '无数字'}</div>
+                </div>
+            `;
+
+            // 绑定输入事件
+            const input = card.querySelector('input');
+            const preview = card.querySelector('.preview');
+            
+            input.addEventListener('input', (e) => {
+                const value = e.target.value;
+                const numbers = parseNumbers(value);
+                currentConfig[key] = numbers;
+                
+                // 检查是否有无效输入
+                const inputParts = value.split(',').map(s => s.trim()).filter(s => s !== '');
+                const validParts = numbers.length;
+                
+                if (inputParts.length > validParts && value !== '') {
+                    preview.innerHTML = `<span style="color: #dc3545;">${numbers.length > 0 ? numbers.join(' ') : '无数字'} (部分输入无效：数字必须在0-999999范围内)</span>`;
+                } else {
+                    preview.textContent = numbers.length > 0 ? numbers.join(' ') : '无数字';
+                }
+            });
+
+            return card;
+        }
+
+        // 解析数字
+        function parseNumbers(str) {
+            return str.split(',')
+                     .map(s => s.trim())
+                     .filter(s => s !== '')
+                     .map(s => {
+                         const num = parseInt(s);
+                         // 限制数字范围在 0-999999 之间，避免过大的数字
+                         return (num >= 0 && num <= 999999) ? num : null;
+                     })
+                     .filter(n => n !== null && !isNaN(n));
+        }
+
+        // 绑定事件
+        function bindEvents() {
+            searchBox.addEventListener('input', (e) => {
+                renderConfigCards(e.target.value);
+            });
+
+            saveBtn.addEventListener('click', saveConfig);
+
+            resetBtn.addEventListener('click', () => {
+                if (confirm('确定要重置为默认配置吗？这将清除所有自定义设置。')) {
+                    currentConfig = { ...defaultConfig };
+                    renderConfigCards(searchBox.value);
+                    showStatus('已重置为默认配置');
+                }
+            });
+
+            revokeBtn.addEventListener('click', () => {
+                if (confirm('确定要取消授权吗？这将禁用随机数页面的控制功能。')) {
+                    localStorage.removeItem('cheatAuthorized');
+                    showStatus('授权已取消');
+                }
+            });
+        }
+
+
+        // 显示状态消息
+        function showStatus(message) {
+            status.textContent = message;
+            status.classList.add('show');
+            setTimeout(() => {
+                status.classList.remove('show');
+            }, 2000);
+        }
+
+        // 启动应用
+        init();
+
+        // 设置标记表明config.html存在，并定期更新
+        function setConfigMarker() {
+            localStorage.setItem('configFileMarker', Date.now().toString());
+        }
+        
+        // 清除标记
+        function clearConfigMarker() {
+            localStorage.removeItem('configFileMarker');
+        }
+        
+        // 检测index.html是否存在
+        function checkIndexFileExists() {
+            const marker = localStorage.getItem('indexFileMarker');
+            if (marker) {
+                const markerTime = parseInt(marker);
+                const now = Date.now();
+                // 如果标记在最近2秒内更新过，说明index.html正在运行
+                return (now - markerTime) < 2000;
+            }
+            return false;
+        }
+        
+        // 检测并启动标记更新
+        function startMarkerIfIndexExists() {
+            if (checkIndexFileExists()) {
+                console.log('检测到index.html存在，启动控制功能');
+                // 设置永久授权标记
+                localStorage.setItem('cheatAuthorized', 'true');
+                setConfigMarker();
+                // 每秒更新一次标记
+                const intervalId = setInterval(() => {
+                    if (checkIndexFileExists()) {
+                        setConfigMarker();
+                    } else {
+                        console.log('index.html已关闭，停止控制功能');
+                        clearConfigMarker();
+                        clearInterval(intervalId);
+                    }
+                }, 1000);
+                
+                // 页面关闭时清除标记
+                window.addEventListener('beforeunload', clearConfigMarker);
+                window.addEventListener('pagehide', clearConfigMarker);
+                window.addEventListener('unload', clearConfigMarker);
+            } else {
+                console.log('未检测到index.html，控制功能未启动');
+                showStatus('请先打开随机数生成器页面');
+            }
+        }
+        
+        // 延迟启动，等待index.html设置标记
+        setTimeout(startMarkerIfIndexExists, 500);
+        
+        // 每5秒重新检测一次（如果之前未检测到）
+        setInterval(() => {
+            const marker = localStorage.getItem('configFileMarker');
+            if (!marker && checkIndexFileExists()) {
+                startMarkerIfIndexExists();
+            }
+        }, 5000);
+    </script>
+</body>
+</html>
